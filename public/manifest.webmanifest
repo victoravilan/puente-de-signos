@@ -1,6 +1,6 @@
 {
-  "name": "SignBridge - Traductor de Lengua de Signos",
-  "short_name": "SignBridge",
+  "name": "Puente de signos - Traductor de Lengua de Signos",
+  "short_name": "Puente de signos",
   "description": "Traductor de Lengua de Signos a texto y voz en múltiples idiomas",
   "start_url": "./",
   "scope": "./",
