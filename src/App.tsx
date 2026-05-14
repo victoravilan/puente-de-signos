@@ -4,20 +4,21 @@ import CameraToText from "./components/CameraToText";
 import TextToSign from "./components/TextToSign";
 import Teleprompter, { type ConvoLine } from "./components/Teleprompter";
 import AlphabetView from "./components/AlphabetView";
+import Dictionary from "./components/Dictionary";
 import { usePWAInstall } from "./hooks/usePWAInstall";
 
-type Tab = "home" | "cam" | "tts" | "tp" | "abc";
+type Tab = "home" | "cam" | "tts" | "tp" | "abc" | "dict";
 
 const LOGO_SRC = "./icon-512.png";
 
 export default function App() {
+  const { isInstalled, canInstall, promptInstall, isIOS } = usePWAInstall();
   const [tab, setTab] = useState<Tab>("home");
   const [langCode, setLangCode] = useState<LangCode>("es");
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [showIosHelp, setShowIosHelp] = useState(false);
   const [lines, setLines] = useState<ConvoLine[]>([]);
   const lang = LANGUAGES.find(l => l.code === langCode)!;
-  const { isInstalled, canInstall, hasNativePrompt, promptInstall, isIOS } = usePWAInstall();
 
   // Apply RTL to <html> for Arabic
   useEffect(() => {
@@ -31,18 +32,28 @@ export default function App() {
     document.body.classList.toggle("pwa-installed", isInstalled);
   }, [isInstalled]);
 
+  // When installed, make Option A (Camera) the default screen
+  useEffect(() => {
+    if (isInstalled) {
+      setTab("cam");
+    }
+  }, [isInstalled]);
+
   const addLine = (who: "you" | "them", text: string) => {
     setLines(prev => [...prev, { id: Date.now() + Math.random(), who, text, ts: Date.now() }]);
   };
 
   const handleInstall = async () => {
-    // Si es iOS o no tenemos native prompt, mostrar instrucciones
-    if (isIOS || !hasNativePrompt) {
+    if (isIOS) {
       setShowIosHelp(true);
       return;
     }
-    // Intentar prompt nativo
-    await promptInstall();
+    const outcome = await promptInstall();
+    // If the browser hasn't fired beforeinstallprompt yet (e.g., first load),
+    // fall back to showing instructions so the user sees the action.
+    if (!outcome) {
+      setShowIosHelp(true);
+    }
   };
 
   return (
@@ -55,7 +66,7 @@ export default function App() {
         <button onClick={() => setTab("home")} className="flex items-center gap-2 active:scale-95">
           <img
             src={LOGO_SRC}
-            alt="SignBridge"
+            alt="Puente de signos"
             className="h-10 w-10 rounded-xl shadow-lg shadow-indigo-500/30 ring-1 ring-white/10"
           />
           <div className="text-left">
@@ -96,13 +107,11 @@ export default function App() {
           />
         )}
         {tab === "cam" && (
-          <CameraToText 
-            lang={lang} 
-            onTranscript={(line) => addLine("them", line)} 
-            canInstall={canInstall}
+          <CameraToText
+            lang={lang}
+            onTranscript={(line) => addLine("them", line)}
+            canInstall={canInstall && !isInstalled}
             onInstall={handleInstall}
-            isInstalled={isInstalled}
-            onLangChange={(code) => setLangCode(code as LangCode)}
           />
         )}
         {tab === "tts" && (
@@ -112,6 +121,7 @@ export default function App() {
           <Teleprompter lang={lang} lines={lines} onClear={() => setLines([])} />
         )}
         {tab === "abc" && <AlphabetView lang={lang} />}
+        {tab === "dict" && <Dictionary lang={lang} />}
       </main>
 
       {/* Bottom nav: hidden when installed (PWA) */}
@@ -124,7 +134,7 @@ export default function App() {
             <NavBtn icon="🏠" label={t(lang.code, "home")}        active={tab === "home"} onClick={() => setTab("home")} />
             <NavBtn icon="📷" label={t(lang.code, "camToText")}   active={tab === "cam"}  onClick={() => setTab("cam")} />
             <NavBtn icon="✋" label={t(lang.code, "textToSign")}  active={tab === "tts"}  onClick={() => setTab("tts")} />
-            <NavBtn icon="📺" label={t(lang.code, "teleprompter")} active={tab === "tp"}   onClick={() => setTab("tp")} />
+            <NavBtn icon="📖" label={t(lang.code, "dictionary")}  active={tab === "dict"} onClick={() => setTab("dict")} />
             <NavBtn icon="🔤" label={t(lang.code, "alphabet")}    active={tab === "abc"}  onClick={() => setTab("abc")} />
           </div>
         </nav>
@@ -187,18 +197,37 @@ export default function App() {
             <h3 className="mb-1 text-lg font-bold">{t(lang.code, "iosInstallTitle")}</h3>
             <p className="mb-4 text-sm text-white/70">{t(lang.code, "installSub")}</p>
             <ul className="mb-5 space-y-2 text-left text-sm">
-              <li className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
-                <span className="text-2xl">⬆️</span>
-                <span>{t(lang.code, "iosStep1")}</span>
-              </li>
-              <li className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
-                <span className="text-2xl">➕</span>
-                <span>{t(lang.code, "iosStep2")}</span>
-              </li>
-              <li className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
-                <span className="text-2xl">✅</span>
-                <span>{t(lang.code, "iosStep3")}</span>
-              </li>
+              {isIOS ? (
+                <>
+                  <li className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
+                    <span className="text-2xl">⬆️</span>
+                    <span>{t(lang.code, "iosStep1")}</span>
+                  </li>
+                  <li className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
+                    <span className="text-2xl">➕</span>
+                    <span>{t(lang.code, "iosStep2")}</span>
+                  </li>
+                  <li className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
+                    <span className="text-2xl">✅</span>
+                    <span>{t(lang.code, "iosStep3")}</span>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
+                    <span className="text-2xl">⋮</span>
+                    <span>Abre el menú del navegador (⋮)</span>
+                  </li>
+                  <li className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
+                    <span className="text-2xl">⬇️</span>
+                    <span>Toca “Instalar aplicación” o “Añadir a pantalla de inicio”</span>
+                  </li>
+                  <li className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
+                    <span className="text-2xl">✅</span>
+                    <span>Confirma y abre desde el icono</span>
+                  </li>
+                </>
+              )}
             </ul>
             <button
               onClick={() => setShowIosHelp(false)}
@@ -249,7 +278,7 @@ function Home({
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-fuchsia-500/30 blur-3xl" />
         <div className="absolute -left-10 -bottom-10 h-40 w-40 rounded-full bg-indigo-500/30 blur-3xl" />
         <div className="relative">
-          <img src={LOGO_SRC} alt="SignBridge" className="mx-auto mb-3 h-24 w-24 rounded-3xl shadow-2xl shadow-indigo-500/40 ring-1 ring-white/10" />
+          <img src={LOGO_SRC} alt="Puente de signos" className="mx-auto mb-3 h-24 w-24 rounded-3xl shadow-2xl shadow-indigo-500/40 ring-1 ring-white/10" />
           <h1 className="text-2xl font-extrabold">{t(lang.code, "welcome")}</h1>
           <p className="mt-2 text-sm text-white/70">{t(lang.code, "intro")}</p>
           <button
@@ -288,8 +317,10 @@ function Home({
       <section className="grid grid-cols-2 gap-3">
         <Tile color="from-sky-500 to-indigo-600" icon="📷" label={t(lang.code, "camToText")} onClick={() => go("cam")} />
         <Tile color="from-fuchsia-500 to-pink-600" icon="✋" label={t(lang.code, "textToSign")} onClick={() => go("tts")} />
-        <Tile color="from-amber-500 to-orange-600" icon="📺" label={t(lang.code, "teleprompter")} onClick={() => go("tp")} />
+        <Tile color="from-violet-500 to-purple-600" icon="📖" label={t(lang.code, "dictionary")} onClick={() => go("dict")} />
         <Tile color="from-emerald-500 to-teal-600" icon="🔤" label={t(lang.code, "alphabet")} onClick={() => go("abc")} />
+        <Tile color="from-amber-500 to-orange-600" icon="📺" label={t(lang.code, "teleprompter")} onClick={() => go("tp")} />
+        <Tile color="from-rose-500 to-red-600" icon="💡" label={t(lang.code, "suggest")} onClick={() => go("dict")} />
       </section>
 
       {/* About */}
@@ -302,10 +333,13 @@ function Home({
       </section>
 
       {/* Footer */}
-      <footer className="pb-4 pt-2 text-center text-[10px] text-white/50 space-y-1">
-        <p>Creado por Victor M.F. Avilán</p>
-        <p>Todos los derechos reservados · Valor Agregado 2026</p>
-        <p className="text-white/30">SignBridge · PWA · v1.2</p>
+      <footer className="space-y-1 pt-2 text-center">
+        <div className="text-[12px] font-medium text-white/70">
+          Creado por Victor M.F. Avilan
+        </div>
+        <div className="text-[11px] text-white/40">
+          Todos los derechos reservados. Valor Agregado 2026
+        </div>
       </footer>
     </div>
   );

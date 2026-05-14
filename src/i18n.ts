@@ -22,7 +22,7 @@ type Dict = Record<string, string>;
 
 export const STRINGS: Record<LangCode, Dict> = {
   es: {
-    appName: "SignBridge",
+    appName: "Puente de signos",
     tagline: "Puente entre voces y manos",
     home: "Inicio",
     camToText: "Signos → Texto",
@@ -73,9 +73,20 @@ export const STRINGS: Record<LangCode, Dict> = {
     iosStep3: "3. Confirma con «Añadir»",
     gotIt: "Entendido",
     installed: "App instalada ✓",
+    dictionary: "Diccionario",
+    dictionaryDesc: "Signos organizados por categorías para consulta rápida",
+    favorites: "Favoritos",
+    share: "Compartir",
+    suggest: "Sugerir signo",
+    suggestDesc: "¿Falta algún signo? Envíanos tu sugerencia",
+    suggestPlaceholder: "Escribe la palabra o signo que crees que falta…",
+    suggestSent: "¡Sugerencia enviada! Gracias por colaborar.",
+    all: "Todos",
+    categories: "Categorías",
+    copied: "Copiado al portapapeles",
   },
   en: {
-    appName: "SignBridge", tagline: "A bridge between voices and hands",
+    appName: "Puente de signos", tagline: "A bridge between voices and hands",
     home: "Home", camToText: "Signs → Text", textToSign: "Text → Signs",
     teleprompter: "Teleprompter", alphabet: "Sign Alphabet", settings: "Settings",
     chooseLang: "Translation language", startCamera: "Start camera", stopCamera: "Stop camera",
@@ -93,7 +104,7 @@ export const STRINGS: Record<LangCode, Dict> = {
     install: "Install app",
   },
   fr: {
-    appName: "SignBridge", tagline: "Un pont entre les voix et les mains",
+    appName: "Puente de signos", tagline: "Un pont entre les voix et les mains",
     home: "Accueil", camToText: "Signes → Texte", textToSign: "Texte → Signes",
     teleprompter: "Téléprompteur", alphabet: "Alphabet des signes", settings: "Réglages",
     chooseLang: "Langue de traduction", startCamera: "Démarrer la caméra", stopCamera: "Arrêter la caméra",
@@ -111,7 +122,7 @@ export const STRINGS: Record<LangCode, Dict> = {
     install: "Installer l'app",
   },
   ru: {
-    appName: "SignBridge", tagline: "Мост между голосами и руками",
+    appName: "Puente de signos", tagline: "Мост между голосами и руками",
     home: "Главная", camToText: "Жесты → Текст", textToSign: "Текст → Жесты",
     teleprompter: "Телесуфлёр", alphabet: "Жестовый алфавит", settings: "Настройки",
     chooseLang: "Язык перевода", startCamera: "Включить камеру", stopCamera: "Остановить камеру",
@@ -129,7 +140,7 @@ export const STRINGS: Record<LangCode, Dict> = {
     install: "Установить",
   },
   it: {
-    appName: "SignBridge", tagline: "Un ponte tra voci e mani",
+    appName: "Puente de signos", tagline: "Un ponte tra voci e mani",
     home: "Home", camToText: "Segni → Testo", textToSign: "Testo → Segni",
     teleprompter: "Gobbo", alphabet: "Alfabeto dei segni", settings: "Impostazioni",
     chooseLang: "Lingua di traduzione", startCamera: "Avvia fotocamera", stopCamera: "Ferma fotocamera",
@@ -147,7 +158,7 @@ export const STRINGS: Record<LangCode, Dict> = {
     install: "Installa app",
   },
   pt: {
-    appName: "SignBridge", tagline: "Uma ponte entre vozes e mãos",
+    appName: "Puente de signos", tagline: "Uma ponte entre vozes e mãos",
     home: "Início", camToText: "Sinais → Texto", textToSign: "Texto → Sinais",
     teleprompter: "Teleponto", alphabet: "Alfabeto de sinais", settings: "Definições",
     chooseLang: "Idioma de tradução", startCamera: "Iniciar câmara", stopCamera: "Parar câmara",
@@ -165,7 +176,7 @@ export const STRINGS: Record<LangCode, Dict> = {
     install: "Instalar app",
   },
   ar: {
-    appName: "SignBridge", tagline: "جسر بين الأصوات والأيدي",
+    appName: "Puente de signos", tagline: "جسر بين الأصوات والأيدي",
     home: "الرئيسية", camToText: "إشارات → نص", textToSign: "نص → إشارات",
     teleprompter: "ملقّن", alphabet: "أبجدية الإشارة", settings: "الإعدادات",
     chooseLang: "لغة الترجمة", startCamera: "تشغيل الكاميرا", stopCamera: "إيقاف الكاميرا",
