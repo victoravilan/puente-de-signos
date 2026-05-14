@@ -14,13 +14,11 @@ interface Props {
   onTranscript?: (line: string) => void;
   canInstall?: boolean;
   onInstall?: () => void;
-  isInstalled?: boolean;
-  onLangChange?: (code: string) => void;
 }
 
 type Status = "idle" | "loading" | "ready" | "error";
 
-export default function CameraToText({ lang, onTranscript, canInstall, onInstall, isInstalled, onLangChange }: Props) {
+export default function CameraToText({ lang, onTranscript, canInstall, onInstall }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -235,70 +233,23 @@ export default function CameraToText({ lang, onTranscript, canInstall, onInstall
   /* ------------------------------------------------------------------ */
   /* Render                                                             */
   /* ------------------------------------------------------------------ */
-  const [showLangPicker, setShowLangPicker] = useState(false);
-  const langs = [
-    { code: "es", label: "ES", flag: "🇪🇸" },
-    { code: "en", label: "EN", flag: "🇬🇧" },
-    { code: "fr", label: "FR", flag: "🇫🇷" },
-    { code: "ru", label: "RU", flag: "🇷🇺" },
-    { code: "it", label: "IT", flag: "🇮🇹" },
-    { code: "pt", label: "PT", flag: "🇧🇷" },
-    { code: "ar", label: "AR", flag: "🇸🇦" },
-  ];
-
   return (
-    <div className="flex flex-col">
-      {/* Compact header with install button */}
-      <header className="flex items-center justify-between gap-2 border-b border-white/10 bg-slate-950/80 px-3 py-2 backdrop-blur">
+    <div className="flex flex-col gap-4">
+      {/* Install banner for Option A */}
+      {canInstall && onInstall && (
         <button
-          onClick={() => window.history.back()}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-lg active:scale-95"
-        >←
-        </button>
-        <div className="text-sm font-bold text-white">{t(lang.code, "camToText")}</div>
-        <div className="flex items-center gap-1">
-          {canInstall && (
-            <button
-              onClick={onInstall}
-              title={t(lang.code, "install")}
-              className="flex h-9 items-center gap-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-2 text-xs font-bold active:scale-95"
-            >
-              <span>⬇</span>
-            </button>
-          )}
-          {isInstalled && (
-            <div className="flex h-9 items-center rounded-full bg-emerald-500/30 px-2 text-xs font-bold text-emerald-300">
-              ✓
+          onClick={onInstall}
+          className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 px-4 py-3 text-left ring-1 ring-emerald-400/30 backdrop-blur hover:from-emerald-500/30 hover:to-cyan-500/30 active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-500/90 text-xl shadow-lg">⬇</div>
+            <div>
+              <div className="text-sm font-bold leading-tight">{t(lang.code, "install")}</div>
+              <div className="text-[11px] text-white/70">{t(lang.code, "installSub")}</div>
             </div>
-          )}
-          <button
-            onClick={() => setShowLangPicker(!showLangPicker)}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-lg active:scale-95"
-          >
-            {lang.flag}
-          </button>
-        </div>
-      </header>
-
-      {/* Language picker dropdown */}
-      {showLangPicker && (
-        <div className="absolute right-3 top-12 z-50 flex flex-col rounded-xl bg-slate-900/95 p-1 shadow-xl ring-1 ring-white/10">
-          {langs.map((l) => (
-            <button
-              key={l.code}
-              onClick={() => {
-                onLangChange?.(l.code);
-                setShowLangPicker(false);
-              }}
-              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm active:scale-95 ${
-                l.code === lang.code ? "bg-indigo-500/30 text-indigo-200" : "text-white"
-              }`}
-            >
-              <span>{l.flag}</span>
-              <span>{l.label}</span>
-            </button>
-          ))}
-        </div>
+          </div>
+          <div className="text-xl opacity-70">›</div>
+        </button>
       )}
 
       {/* Video viewport */}
@@ -442,6 +393,18 @@ export default function CameraToText({ lang, onTranscript, canInstall, onInstall
               disabled={!transcript || speaking}
               className="rounded-lg bg-indigo-500/80 px-3 py-1 text-xs font-semibold text-white disabled:opacity-40"
             >🔊 {t(lang.code, "speak")}</button>
+            <button
+              onClick={async () => {
+                if (!transcript) return;
+                if (navigator.share) {
+                  try { await navigator.share({ title: t(lang.code, "appName"), text: transcript }); } catch {}
+                } else {
+                  await navigator.clipboard.writeText(transcript);
+                }
+              }}
+              disabled={!transcript}
+              className="rounded-lg bg-white/10 px-3 py-1 text-xs disabled:opacity-40"
+            >📤 {t(lang.code, "share")}</button>
             <button
               onClick={() => setTranscript("")}
               className="rounded-lg bg-white/10 px-3 py-1 text-xs"

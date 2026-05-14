@@ -119,6 +119,18 @@ export default function TextToSign({ lang, onMessage }: Props) {
             disabled={!text.trim()}
             className="rounded-xl bg-white/10 px-3 py-2 text-sm disabled:opacity-40"
           >🔊 {t(lang.code, "speak")}</button>
+          <button
+            onClick={async () => {
+              if (!text.trim()) return;
+              if (navigator.share) {
+                try { await navigator.share({ title: t(lang.code, "appName"), text }); } catch {}
+              } else {
+                await navigator.clipboard.writeText(text);
+              }
+            }}
+            disabled={!text.trim()}
+            className="rounded-xl bg-white/10 px-3 py-2 text-sm disabled:opacity-40"
+          >📤 {t(lang.code, "share")}</button>
           <div className="flex-1" />
           <button
             onClick={onSend}
