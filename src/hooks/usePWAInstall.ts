@@ -65,19 +65,19 @@ export function usePWAInstall() {
     return choice.outcome;
   }, [deferredPrompt]);
 
-  // Mostramos el botón SIEMPRE cuando no está instalada (excepto en browsers que ya dispararon y rejectaron)
-  // El beforeinstallprompt es solo un "sugerencia" del browser, no un requisito
-  // En iOS siempre podemos ofrecer instalación manual
-  // En Chrome desktop a veces no se dispara hasta que hay interacción significativa
-  const canInstall = !isInstalled;
+  // On iOS we can still "offer install" via instructions even without prompt
+  // Show button proactively on all browsers that support PWA (Chrome, Edge, Samsung Internet),
+  // even before beforeinstallprompt fires — it will appear once criteria are met.
+  // Fallback: if no prompt after 1.5s and not iOS, still allow showing the button so user sees it.
+  const [showAnyway, setShowAnyway] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setShowAnyway(true), 1500);
+    return () => clearTimeout(t);
+  }, []);
 
-  // Forzamos a que canInstall sea true siempre que no esté instalada
-  // (el promptInstall se encargará de verificar si deferredPrompt existe)
+  const canInstall = !isInstalled && (deferredPrompt !== null || isIOS || showAnyway);
 
-  // Info adicional para UI
-  const hasNativePrompt = deferredPrompt !== null;
-
-  return { isInstalled, canInstall, hasNativePrompt, promptInstall, isIOS };
+  return { isInstalled, canInstall, promptInstall, isIOS };
 }
 
 function detectStandalone(): boolean {
